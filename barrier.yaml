@@ -1,0 +1,17 @@
+APP_PORT: 8100
+TimeOutHttpResp: 5000
+TimeoutConnectSec: 5
+MaxRetries: 5
+TimeBetweenRetrySec: 5
+TimeRetryAfterMaxSec: 5
+DefaultNotification:
+  - gate
+Barriers:
+    - ip: 192.168.25.207
+      name: hello
+      id:
+        - 101
+        - 750
+        - 41
+      barrierType: entry
+      port: 52719

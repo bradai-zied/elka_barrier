@@ -1,0 +1,7 @@
+BUSBZ ==  barrier locked down
+BUSBA == barrier locked up
+
+Multi6 ==Barrier Closed
+Multi5 == barrier OPEN
+AdjustmentLoopX === barrier error
+msghandler line 121 to 133 to barrier flags status
