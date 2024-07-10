@@ -23,6 +23,9 @@ WORKDIR /app
 
 COPY --from=builder /elka /app/elka
 
+ADD templates /app/templates 
+ADD static /app/static 
+
 RUN chmod +x /app/elka
 
 ENV TZ=UTC

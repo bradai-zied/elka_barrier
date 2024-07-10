@@ -13,6 +13,7 @@ import (
 )
 
 var ElkaController map[int]*Controller
+var IPElkaController map[string]*Controller
 
 // var address = "192.168.25.206" // Replace with your controller's IP address
 // var Response chan []byte
@@ -42,6 +43,7 @@ type Controller struct {
 	LoopA              bool
 	LoopB              bool
 	MessageToApi       chan string `json:"-"`
+	Id                 int
 }
 
 func NewController(barrierip string) *Controller {
@@ -52,6 +54,7 @@ func NewController(barrierip string) *Controller {
 		LoopA:              false,
 		LoopB:              false,
 		BarrierPositionStr: "Uknown",
+		Id:                 0,
 		// stopChan:           make(chan struct{}),
 		messages:     make(chan []byte, 200), // Buffer for 100 messages
 		MessageToApi: make(chan string, 1),

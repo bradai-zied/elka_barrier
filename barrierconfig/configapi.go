@@ -1,9 +1,11 @@
 package barrierconfig
 
 import (
+	"bytes"
 	"go_barrier/def"
 	g "go_barrier/globals"
 	"go_barrier/utils"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 
@@ -75,13 +77,29 @@ func GetBarrier() gin.HandlerFunc {
 func AddBarrier() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
+		// Read the raw body
+		bodyBytes, errb := ioutil.ReadAll(c.Request.Body)
+		if errb != nil {
+			log.Error().Err(errb).Msg("Error reading request body")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Error reading request body"})
+			return
+		}
+
+		// Log the raw body
+		log.Info().Msgf("Raw request body: %s", string(bodyBytes))
+
+		// Restore the request body to its original state
+		c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
 		var newBarrier def.Barrier
 		if err := c.ShouldBindJSON(&newBarrier); err != nil {
+			log.Err(err).Msgf("error binding json body ")
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
 		if utils.ContainsInt(g.BarrierIds, newBarrier.ID) {
+			log.Error().Msg("Barrier ID already exists")
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Barrier ID already exists"})
 			return
 		}

@@ -120,21 +120,20 @@ func CloseBarrier() gin.HandlerFunc {
 			return
 		}
 
-		if elka.ElkaController[id].IsClosed {
-			log.Warn().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Bool("IsClosed", elka.ElkaController[id].IsClosed).Msg("Barrier locked Up")
-			elka.ElkaController[id].IsClosed = true
-			c.JSON(http.StatusOK, gin.H{"message": "Barrier Already Closed"})
+		if elka.ElkaController[id].IsLockedDown {
+			log.Warn().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Msg("Barrier locked down")
+			// elka.ElkaController[id].IsClosed = true
+			c.JSON(http.StatusOK, gin.H{"message": "Barrier is Locked down"})
 			return
 		}
-
-		// if len(elka.ElkaController[id].MessageToApi) > 0 {
-		select {
-
-		case OldMsg := <-elka.ElkaController[id].MessageToApi:
-			log.Debug().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Int("ChannelLength", len(elka.ElkaController[id].MessageToApi)).Msgf("OldMsg: %s" + OldMsg)
-
-		default:
-			// Channel is empty now
+		//empty channel
+		if len(elka.ElkaController[id].MessageToApi) > 0 {
+			select {
+			case OldMsg := <-elka.ElkaController[id].MessageToApi:
+				log.Debug().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Int("ChannelLength", len(elka.ElkaController[id].MessageToApi)).Msgf("OldMsg: %s" + OldMsg)
+			default:
+				// Channel is empty now
+			}
 		}
 
 		// }
@@ -143,46 +142,31 @@ func CloseBarrier() gin.HandlerFunc {
 			elka.ElkaController[id].IsLockedDown = true
 			elka.ElkaController[id].IsClosed = true
 		} else {
-			elka.ElkaController[id].IsClosed = true
 			elka.ElkaController[id].Close()
+			elka.ElkaController[id].IsClosed = true
 		}
-
-		select {
-		case <-time.After(time.Duration(g.Config.TimeOutHttpResp) * time.Millisecond):
-			log.Warn().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Msg("Failed to Close barrier")
-			c.JSON(http.StatusBadRequest, gin.H{"message": "Barrier Not responding"})
-		case closerepsone := <-elka.ElkaController[id].MessageToApi:
-			log.Debug().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Int("ChannelLength", len(elka.ElkaController[id].MessageToApi)).Str("closerepsone", closerepsone).Msg("+++++++++++++++++++++WHTF")
-			switch closerepsone {
-			case "Closed":
-				c.JSON(http.StatusOK, gin.H{"message": "Barrier already Closed successfully"})
-				return
-			case "Open":
-				log.Debug().Msg("Ignore OlD message")
-			case "ack":
-				log.Debug().Msg("Ignore ack message")
-			case "nak":
-				log.Warn().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Str("BArrier message", closerepsone).Msg("Barrier Refused to close")
-				c.JSON(http.StatusOK, gin.H{"message": "Barrier Refused to close"})
-
-				// default:
-				// 	log.Warn().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Str("BArrier message", closerepsone).Msg("Barrier Not responding")
+		time.Sleep(300 * time.Millisecond)
+		emptybool := true
+		for emptybool {
+			select {
+			case <-time.After(time.Duration(g.Config.TimeOutHttpResp) * time.Second):
+				log.Warn().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Msg("Failed to unlock barrier")
+				// c.JSON(http.StatusBadRequest, gin.H{"message": "Barrier Unlocked Refused"})
+			case Oldmsg := <-elka.ElkaController[id].MessageToApi:
+				log.Warn().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Msgf("Oldmsg %s", Oldmsg)
+				// c.JSON(http.StatusBadRequest, gin.H{"message": "Barrier Unlocked Refused"})
+			default:
+				emptybool = false
 			}
 		}
-		closerepsone := "default"
-		select {
-		case <-time.After(time.Duration(g.Config.TimeOutHttpResp) * time.Millisecond):
-			log.Warn().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Msg("Failed to unlock barrier")
-			c.JSON(http.StatusBadRequest, gin.H{"message": "Barrier Not responding"})
-		case closerepsone = <-elka.ElkaController[id].MessageToApi:
-			log.Debug().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Str("BArrier message", closerepsone).Msg("________Barrier Close Response :")
-			if closerepsone == "Closed" || closerepsone == "Closing" {
-				c.JSON(http.StatusOK, gin.H{"message": "Barrier Closed successfully"})
-				return
-			}
+		log.Debug().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Str("BArrier message", elka.ElkaController[id].BarrierPositionStr).Msg("________Barrier Close Response :")
+		if elka.ElkaController[id].BarrierPositionStr == "Closed" || elka.ElkaController[id].BarrierPositionStr == "Closing" {
+			c.JSON(http.StatusOK, gin.H{"message": "Barrier Closed successfully"})
+			return
 		}
+
 		// log.Info().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Msg("Barrier Closed successfully")
-		log.Error().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Str("closerepsone", closerepsone).Msg("Uknown message while waiting closing message")
+		log.Error().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Str("closerepsone", elka.ElkaController[id].BarrierPositionStr).Msg("Uknown message while waiting closing message")
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Barrier Not responding"})
 	}
 }
@@ -197,8 +181,8 @@ func UnlockBarrier() gin.HandlerFunc {
 			return
 		}
 
-		log.Debug().Int("Lane ", id).Msgf("Send opUnlocen to barrier IP: %s", elka.ElkaController[id].Barrierip)
-
+		log.Debug().Int("Lane ", id).Msgf("Send Unlock to barrier IP: %s", elka.ElkaController[id].Barrierip)
+		//empty channel
 		if len(elka.ElkaController[id].MessageToApi) > 0 {
 			select {
 
@@ -211,22 +195,31 @@ func UnlockBarrier() gin.HandlerFunc {
 
 		}
 
-		elka.ElkaController[id].Unlock()
 		//send telegram to check barrier inputs
 		elka.ElkaController[id].SendQueryTelegram(0x02)
-		select {
-		case <-time.After(time.Duration(g.Config.TimeOutHttpResp) * time.Second):
-			log.Warn().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Msg("Failed to unlock barrier")
-			c.JSON(http.StatusBadRequest, gin.H{"message": "Barrier Unlocked Refused"})
-		case <-elka.ElkaController[id].MessageToApi:
-			if elka.ElkaController[id].LoopA {
-				log.Debug().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Msg("LoopA is active open Barrier after unlock")
-				elka.ElkaController[id].Open()
+		time.Sleep(1000 * time.Millisecond)
+		emptybool := true
+		for emptybool {
+			select {
+			case <-time.After(time.Duration(g.Config.TimeOutHttpResp) * time.Second):
+				log.Warn().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Msg("Failed to unlock barrier")
+				// c.JSON(http.StatusBadRequest, gin.H{"message": "Barrier Unlocked Refused"})
+			case Oldmsg := <-elka.ElkaController[id].MessageToApi:
+				log.Warn().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Msgf("Oldmsg %s", Oldmsg)
+				// c.JSON(http.StatusBadRequest, gin.H{"message": "Barrier Unlocked Refused"})
+			default:
+				emptybool = false
 			}
 		}
-
+		elka.ElkaController[id].Unlock()
 		elka.ElkaController[id].IsLockedUp = false
 		elka.ElkaController[id].IsLockedDown = false
+		time.Sleep(200 * time.Millisecond)
+		log.Debug().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Msg("Status")
+		if elka.ElkaController[id].LoopA {
+			log.Debug().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Msg("LoopA is active open Barrier after unlock")
+			elka.ElkaController[id].Open()
+		}
 
 		// barrierstatus, err := elka.ElkaController[id].GetBarrierStatus()
 		// if err != nil {
@@ -282,7 +275,13 @@ func GetBarrierStatus() gin.HandlerFunc {
 
 		log.Debug().Str("BarrierIP", elka.ElkaController[id].Barrierip).Int("id", id).Msgf("send GetStatus : %d", id)
 		status := elka.ElkaController[id].BarrierPositionStr
-		c.JSON(http.StatusOK, gin.H{"message": status})
+		if elka.ElkaController[id].IsLockedDown {
+			status = "LockedDown"
+		}
+		if elka.ElkaController[id].IsLockedUp {
+			status = "LockedUp"
+		}
+		c.JSON(http.StatusOK, status)
 	}
 }
 
@@ -367,11 +366,11 @@ func Querydata() gin.HandlerFunc {
 		}
 
 		// Bind the JSON body to the requestBody struct
-		if err := c.ShouldBindJSON(&requestBody); err != nil {
-			log.Error().Err(err).Msg("Invalid request body")
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-			return
-		}
+		// if err := c.ShouldBindJSON(&requestBody); err != nil {
+		// 	log.Error().Err(err).Msg("Invalid request body")
+		// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		// 	return
+		// }
 		queryType, err := strconv.ParseUint(query, 16, 8)
 		if err != nil {
 			log.Warn().Str("query", query).Msg("Invalid query")

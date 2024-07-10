@@ -10,6 +10,8 @@ import (
 
 	g "go_barrier/globals"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
@@ -34,11 +36,31 @@ func main() {
 	// r.Use(middleware.CheckMiddleware())
 
 	//WEB
-	r.GET("/", webhandler.ServeHomePage)
+	// Set up the session middleware
+	store := cookie.NewStore([]byte("secret"))
+	r.Use(sessions.Sessions("mysession", store))
+
+	// Serve static files
+	r.Static("/static", "./static")
+
 	r.LoadHTMLGlob("templates/*")
+	r.GET("/login", webhandler.ShowLoginPage)
+	r.POST("/login", webhandler.PerformLogin)
+	r.GET("/logout", webhandler.Logout)
+	// Protected routes
+	authorized := r.Group("/")
+	authorized.Use(webhandler.AuthRequired)
+	{
+		authorized.GET("/", webhandler.ServeDashboard)
+		authorized.GET("/dashboard", webhandler.ServeDashboard)
+		authorized.GET("/barriers", webhandler.ServeBarriersPage) // Add this line
+		// Add other protected routes here
+	}
 
 	//debug
 	r.GET("/debug", utils.DebugHandler)
+	r.GET("/allstatus", utils.AllStatusHandler)
+	r.GET("/restart", utils.Restart)
 
 	r.GET("/Barrier", barrierconfig.GetAllBarriers())
 	r.GET("/Barrier/:id", barrierconfig.GetBarrier())

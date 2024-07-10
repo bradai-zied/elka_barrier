@@ -1,0 +1,242 @@
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #e5e5e5;
+  --text-primary: #000000;
+  --text-secondary: #14213d;
+  --accent-primary: #fca311;
+  --accent-secondary: #14213d;
+  --error: #d00000;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  flex-grow: 1;
+}
+
+.card {
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+h1, h2, h3 {
+  margin-bottom: 20px;
+  color: var(--text-secondary);
+}
+
+input[type="text"], input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid var(--text-secondary);
+  border-radius: 4px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+.btn {
+  display: inline-block;
+  background-color: var(--accent-primary);
+  color: var(--text-secondary);
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.btn:hover {
+  background-color: var(--accent-secondary);
+  color: var(--bg-primary);
+}
+
+.error {
+  color: var(--error);
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.navbar {
+  background-color: var(--accent-secondary);
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar a {
+  color: var(--bg-primary);
+  text-decoration: none;
+  margin-right: 20px;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.navbar a:hover {
+  color: var(--accent-primary);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+}
+
+.stat-number {
+  font-size: 3em;
+  font-weight: bold;
+  color: var(--accent-primary);
+  margin: 10px 0;
+}
+
+.recent-activity {
+  list-style-type: none;
+  padding: 0;
+}
+
+.recent-activity li {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--text-secondary);
+}
+
+.recent-activity li:last-child {
+  border-bottom: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+
+/* FOR DATA TABLE */
+/* Table styling */
+#barriers-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+#barriers-table thead th {
+  background-color: var(--accent-secondary);
+  color: var(--bg-primary);
+  padding: 12px;
+  text-align: left;
+  font-weight: bold;
+}
+
+#barriers-table tbody td {
+  padding: 12px;
+  border-bottom: 1px solid var(--text-secondary);
+}
+
+#barriers-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* DataTables specific styling */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_processing,
+.dataTables_wrapper .dataTables_paginate {
+  color: var(--text-primary);
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  color: var(--text-primary) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+  color: var(--bg-primary) !important;
+  background: var(--accent-primary);
+  border-color: var(--accent-secondary);
+}
+
+/* Button styling */
+.dt-button, .btn {
+  background-color: var(--accent-primary);
+  color: var(--bg-primary);
+  border: none;
+  padding: 8px 16px;
+  margin: 4px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.dt-button:hover, .btn:hover {
+  background-color: var(--accent-secondary);
+}
+
+/* Ensure proper alignment for action buttons */
+#barriers-table .actions {
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Style for editable cells */
+#barriers-table .editable:hover {
+  background-color: var(--bg-primary);
+  cursor: pointer;
+}
+
+/* Style for input fields when editing */
+#barriers-table input[type="text"],
+#barriers-table select {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--accent-primary);
+}
+
+/* Increase the height of new rows */
+#barriers-table tr.new-row td {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+#restart-app {
+  margin-right: 10px;
+  background-color: #ff2c07;  /* Warning color */
+  color: #000;
+}
+
+#restart-app:hover {
+  background-color: #e0a800;
+}

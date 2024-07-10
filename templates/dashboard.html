@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barrier Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+
+<body>
+  <nav class="navbar">
+    <div>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/barriers">Barriers</a>
+    </div>
+    <div>
+        <button id="restart-app" class="btn btn-warning">Restart Application</button>
+        <a href="/logout" class="btn">Logout</a>
+    </div>
+</nav>
+  <div class="container">
+    <h1>Barrier Dashboard</h1>
+    <div class="barrier-grid">
+      <!-- Barrier cards will be dynamically inserted here -->
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+  <script src="/static/js/dashboard.js"></script>
+
+</body>
+
+</html>

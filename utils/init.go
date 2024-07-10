@@ -21,10 +21,13 @@ func SetDefaultConfig(c *elka.Controller) {
 func BuildElkaControllerMap() {
 	n := len(g.Config.Barriers)
 	elka.ElkaController = make(map[int]*elka.Controller, n)
+	elka.IPElkaController = make(map[string]*elka.Controller, n)
 	for _, yamlBarrier := range g.Config.Barriers {
 		elkaC := elka.NewController(yamlBarrier.IP)
+		elkaC.Id = yamlBarrier.ID[0]
 		for _, id := range yamlBarrier.ID {
 			elka.ElkaController[id] = elkaC
+			elka.IPElkaController[yamlBarrier.IP] = elkaC
 		}
 		log.Info().Msgf("Connect to Barrier:%s", elkaC.GetBarrierIP())
 		go func() {

@@ -11,7 +11,7 @@ var (
 	// address     = "192.168.25.206" // Replace with your controller's IP and port
 	maxRetries = g.Config.MaxRetries
 	// retryDelay             = time.Duration(g.Config.TimeBetweenRetrySec) * time.Second
-	readTimeout            = time.Duration(g.Config.TimeOutHttpResp) * time.Second
+	// readTimeout            = time.Duration(g.Config.TimeOutHttpResp) * time.Second
 	ConnectTimeOutAfterMax = time.Duration(g.Config.TimeRetryAfterMaxSec) * time.Second
 )
 
